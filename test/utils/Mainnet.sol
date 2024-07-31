@@ -2,6 +2,7 @@
 pragma solidity 0.8.25;
 
 library Mainnet {
+    address public constant Bad_USDC = 0x1234567890123456789012345678901234567890;
     address public constant usdc = 0x1234567890123456789012345678901234567890;
     address public constant USDC_VAULT = 0x88e6A0C2DF7a3F2fd3dC7D9d7F5B8DC5d5A3Fae6;
     address public constant USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;

@@ -16,21 +16,21 @@ library Addresses {
         } else {
             revert("Addresses: unsupported chain");
         }
-        return getAddress(chain, name);
+        return _getAddress(chain, name);
     }
 
-    function getAddress(string memory chain, string calldata name) public view returns (address) {
+    function _getAddress(string memory chain, string calldata name) internal view returns (address) {
         // Read library file
         string memory file = vm.readFile(string(abi.encodePacked(vm.projectRoot(), "/test/utils/", chain, ".sol")));
 
         // Address index starts after the name index + name length + 3 (for `space` + `=` + `space`)
-        uint256 index = getIndex(file, name) + LibString.runeCount(name) + 3;
+        uint256 index = _getIndex(file, name) + LibString.runeCount(name) + 3;
 
         // Get address
         return vm.parseAddress(LibString.slice(file, index, index + 42));
     }
 
-    function getIndex(string memory file, string memory name) public pure returns (uint256) {
+    function _getIndex(string memory file, string memory name) internal pure returns (uint256) {
         uint256[] memory indexes = LibString.indicesOf(file, name);
         if (indexes.length == 0) {
             revert("Addresses: name not found");
@@ -42,8 +42,13 @@ library Addresses {
             // So we check that the next string after the name is ` = 0x`
             string[] memory splitted = LibString.split(file, name);
 
+            // Loop through the splitted strings and check if the next string is ` = 0x`
+            // and if the string before the name is a `space`. If so, this should be the unique name.
             for (uint256 i = 0; i < splitted.length; i++) {
-                if (LibString.eq(LibString.slice(splitted[i + 1], 0, 5), " = 0x")) {
+                if (
+                    LibString.endsWith(splitted[i], " ")
+                        && LibString.eq(LibString.slice(splitted[i + 1], 0, 5), " = 0x")
+                ) {
                     return indexes[i];
                 }
             }
